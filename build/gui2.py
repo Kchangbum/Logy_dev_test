@@ -4,15 +4,17 @@
 
 import os
 from pathlib import Path
+import pickle
 
 # from tkinter import *
 # Explicit imports to satisfy Flake8
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, BooleanVar, IntVar, Checkbutton, Label
+from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage, BooleanVar, IntVar, Checkbutton, Label, Frame, BOTTOM, TOP, Radiobutton, LEFT
 from PIL import Image, ImageTk
 
+import tkinter as ttk
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/hongtaegsu/Downloads/build/assets/frame2")
+ASSETS_PATH = OUTPUT_PATH / Path(r"/Users/user/Logy_dev_test\build/assets/frame2")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -95,7 +97,7 @@ button_1 = Button(
     image=button_image_1,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_1 clicked"),
+    command=window.quit,
     relief="flat"
 )
 button_1.place(
@@ -151,18 +153,32 @@ def create_image_check_box(window, canvas, on_image_path, off_image_path, x, y):
     off_image = ImageTk.PhotoImage(Image.open(relative_to_assets(off_image_path)))
 
     def toggle_image(event):
-        nonlocal check_status
+        nonlocal check_status #nonlocal키워드를 사용하여 check_status변수를 외부에서 정의된 변수로 사용되고 있음을 명시
+        
+        if not check_status: #check_status가 False일때
+            # 체크 상태인 경우 다른 모든 체크 박스를 선택 해제
+            for checkbox in check_boxes:
+                if checkbox != check_button: #다른 모든 체크박스 해제
+                    canvas.itemconfigure(checkbox, image=off_image)
         check_status = not check_status
-        if check_status:
-            canvas.itemconfigure(check_button, image=on_image)
-        else:
-            canvas.itemconfigure(check_button, image=off_image)
+        canvas.itemconfigure(check_button, image=on_image) if check_status else canvas.itemconfigure(check_button, image=off_image)
 
     check_button = canvas.create_image(x, y, image=off_image, anchor="center")
     canvas.tag_bind(check_button, '<Button-1>', toggle_image)
+    
+    check_boxes.append(check_button)
     return check_button
 
+check_boxes = [] #선택 가능한 체크 박스의 목록을 저장하는 리스트
 
+# 숨겨질 프레임 생성
+backend_options_frame = Frame(window, bg='red', width=400, height=100)
+
+# 숨겨진 프레임에 내용 추가 (예시로 레이블 추가)
+Label(backend_options_frame, text="VRChatOSC Options", bg='red').pack()
+
+
+#이미지 체크 박스 생성
 check_box_steam_vr = create_image_check_box(window, canvas, "check_on.png", "check_off.png", 125, 215)
 check_box_vrchat_osc = create_image_check_box(window, canvas, "check_on.png", "check_off.png", 295, 214)
 #####
